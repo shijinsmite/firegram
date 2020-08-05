@@ -6,6 +6,8 @@ import { db, auth } from './Firebase';
 import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
 import { Button, Input } from '@material-ui/core';
+import ImageUpload from './ImageUpload';
+import InstagramEmbed from 'react-instagram-embed';
 
 function getModalStyle() {
   const top = 50;
@@ -45,7 +47,6 @@ const App = () => {
     //this listener will fire on auth changes
     const unsubscribe = auth.onAuthStateChanged((authUser) => {
       if (authUser) {
-        console.log(authUser);
         setUser(authUser);
       } else {
         setUser(null);
@@ -60,46 +61,45 @@ const App = () => {
 
   useEffect(() => {
     // onsnapshot is a listener, which updates posts on db change
-    db.collection('posts').onSnapshot((snapshot) => {
-      setPosts(
-        snapshot.docs.map((doc) => ({
-          id: doc.id,
-          post: doc.data(),
-        }))
-      );
-    });
+    db.collection('posts')
+      .orderBy('timestamp', 'desc')
+      .onSnapshot((snapshot) => {
+        setPosts(
+          snapshot.docs.map((doc) => ({
+            id: doc.id,
+            post: doc.data(),
+          }))
+        );
+      });
   }, []);
 
+  //fired while clicking sign up button
   const signUp = (e) => {
     e.preventDefault();
-
     auth
       .createUserWithEmailAndPassword(email, password)
       .then((authUser) => {
+        console.log(username);
         return authUser.user.updateProfile({
           displayName: username,
         });
       })
       .catch((error) => alert(error.message));
+    setOpen(false);
   };
 
+  // fired while clicking sign in button
   const signIn = (e) => {
     e.preventDefault();
-
     auth
       .signInWithEmailAndPassword(email, password)
       .catch((error) => alert(error.message));
-
     setopenSignIn(false);
   };
 
+  console.log(user?.displayName);
   return (
     <div className="app">
-
-    
-
-
-
       {/* modal for signup */}
       <Modal open={open} onClose={() => setOpen(false)}>
         <div style={modalStyle} className={classes.paper}>
@@ -158,25 +158,50 @@ const App = () => {
 
       <div className="app__header">
         <img className="app__headerImage" src={logo} alt="logo"></img>
+
+        {user ? (
+          <Button onClick={() => auth.signOut()}>Logout</Button>
+        ) : (
+          <div className="app_loginContainer">
+            <Button onClick={() => setopenSignIn(true)}>Sign In</Button>
+            <Button onClick={() => setOpen(true)}>Sign up</Button>
+          </div>
+        )}
       </div>
 
-      {user ? (
-        <Button onClick={() => auth.signOut()}>Logout</Button>
-      ) : (
-        <div className="app_loginContainer">
-          <Button onClick={() => setopenSignIn(true)}>Sign In</Button>
-          <Button onClick={() => setOpen(true)}>Sign up</Button>
+      <div className="app__posts">
+        <div className="app__postsLeft">
+          {posts.map(({ id, post }) => (
+            <Post
+              key={id}
+              postId={id}
+              username={post.username}
+              caption={post.caption}
+              imageUrl={post.imageUrl}
+            />
+          ))}
         </div>
-      )}
+        <div className="app_postsRight">
+          <InstagramEmbed
+            url="https://instagr.am/p/Zw9o4/"
+            maxWidth={320}
+            hideCaption={false}
+            containerTagName="div"
+            protocol=""
+            injectScript
+            onLoading={() => {}}
+            onSuccess={() => {}}
+            onAfterRender={() => {}}
+            onFailure={() => {}}
+          />
+        </div>
+      </div>
 
-      {posts.map(({ id, post }) => (
-        <Post
-          key={id}
-          username={post.username}
-          caption={post.caption}
-          imageUrl={post.imageUrl}
-        />
-      ))}
+      {user?.displayName ? (
+        <ImageUpload username={user.displayName} />
+      ) : (
+        <h3>Login to upload</h3>
+      )}
     </div>
   );
 };
