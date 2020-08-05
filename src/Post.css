@@ -27,3 +27,27 @@
   margin-right: 5px;
   object-fit: contain;
 }
+
+.post__commentBox {
+  display: flex;
+  margin-top: 10px;
+}
+
+.post__input {
+  flex: 1;
+  border: none;
+  padding: 10px;
+  border-top: 1px solid lightgray;
+}
+
+.post__button {
+  flex: 0;
+  border: none;
+  background: transparent;
+  color: #0095F6;
+  border-top: 1px solid lightgray;
+}
+
+.post__comments {
+  padding: 10px;
+}
