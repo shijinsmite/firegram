@@ -34,12 +34,32 @@ const App = () => {
 
   const [posts, setPosts] = useState([]);
   const [open, setOpen] = useState(false);
+  const [openSignIn, setopenSignIn] = useState(false);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
+    //this listener will fire on auth changes
+    const unsubscribe = auth.onAuthStateChanged((authUser) => {
+      if (authUser) {
+        console.log(authUser);
+        setUser(authUser);
+      } else {
+        setUser(null);
+      }
+
+      return () => {
+        //perform cleanup actions, this will run first in useeffect hook
+        unsubscribe();
+      };
+    });
+  }, [user, username]);
+
+  useEffect(() => {
+    // onsnapshot is a listener, which updates posts on db change
     db.collection('posts').onSnapshot((snapshot) => {
       setPosts(
         snapshot.docs.map((doc) => ({
@@ -55,11 +75,32 @@ const App = () => {
 
     auth
       .createUserWithEmailAndPassword(email, password)
+      .then((authUser) => {
+        return authUser.user.updateProfile({
+          displayName: username,
+        });
+      })
       .catch((error) => alert(error.message));
+  };
+
+  const signIn = (e) => {
+    e.preventDefault();
+
+    auth
+      .signInWithEmailAndPassword(email, password)
+      .catch((error) => alert(error.message));
+
+    setopenSignIn(false);
   };
 
   return (
     <div className="app">
+
+    
+
+
+
+      {/* modal for signup */}
       <Modal open={open} onClose={() => setOpen(false)}>
         <div style={modalStyle} className={classes.paper}>
           <form className="app__signUp">
@@ -90,10 +131,43 @@ const App = () => {
         </div>
       </Modal>
 
+      {/* modal for sign in */}
+      <Modal open={openSignIn} onClose={() => setopenSignIn(false)}>
+        <div style={modalStyle} className={classes.paper}>
+          <form className="app__signUp">
+            <img src={logo} alt="logo" />
+
+            <Input
+              placeholder="email"
+              type="text"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            ></Input>
+            <Input
+              placeholder="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            ></Input>
+            <Button type="submit" onClick={signIn}>
+              Sign in
+            </Button>
+          </form>
+        </div>
+      </Modal>
+
       <div className="app__header">
         <img className="app__headerImage" src={logo} alt="logo"></img>
       </div>
-      <Button onClick={() => setOpen(true)}>Sign up</Button>
+
+      {user ? (
+        <Button onClick={() => auth.signOut()}>Logout</Button>
+      ) : (
+        <div className="app_loginContainer">
+          <Button onClick={() => setopenSignIn(true)}>Sign In</Button>
+          <Button onClick={() => setOpen(true)}>Sign up</Button>
+        </div>
+      )}
 
       {posts.map(({ id, post }) => (
         <Post
