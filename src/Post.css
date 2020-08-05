@@ -40,6 +40,12 @@
   border-top: 1px solid lightgray;
 }
 
+.warning {
+  text-align: center;
+  color: rgb(187, 76, 76);
+  padding: 10px;
+}
+
 .post__button {
   flex: 0;
   border: none;

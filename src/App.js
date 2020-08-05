@@ -169,6 +169,19 @@ const App = () => {
         )}
       </div>
 
+      {!user && (
+        <h1 className="warning">
+          This is how the original instagram looks like, but after you sign in
+          keep your expectation low
+        </h1>
+      )}
+
+      {user?.displayName ? (
+        <ImageUpload username={user.displayName} />
+      ) : (
+        <h3></h3>
+      )}
+
       <div className="app__posts">
         <div className="app__postsLeft">
           {posts.map(({ id, post }) => (
@@ -197,12 +210,6 @@ const App = () => {
           />
         </div>
       </div>
-
-      {user?.displayName ? (
-        <ImageUpload username={user.displayName} />
-      ) : (
-        <h3>Login to upload</h3>
-      )}
     </div>
   );
 };

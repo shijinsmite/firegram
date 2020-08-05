@@ -38,46 +38,48 @@ const Post = ({ postId, user, username, caption, imageUrl }) => {
   };
 
   return (
-    <div className="post">
-      <div className="post__header">
-        <Avatar className="post__avatar" alt="avatar" src={null}></Avatar>
-        <h3>{username}</h3>
-      </div>
-
-      <img src={imageUrl} alt="post" className="post__image" />
-      <h4 className="post__text">
-        <strong>{username}: </strong>
-        {caption}
-      </h4>
-
-      <div className="post__comments">
-        {comments.map((comment) => (
-          <p>
-            <strong>{comment.username}</strong> {comment.text}
-          </p>
-        ))}
-      </div>
-
+    <>
       {user && (
-        <form className="post__commentBox">
-          <input
-            className="post__input"
-            type="text"
-            placeholder="Add a comment..."
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-          ></input>
-          <button
-            disabled={!comment}
-            className="post__button"
-            type="submit"
-            onClick={postComment}
-          >
-            Post
-          </button>
-        </form>
-      )}
-    </div>
+        <div className="post">
+          <div className="post__header">
+            <Avatar className="post__avatar" alt="avatar" src={null}></Avatar>
+            <h3>{username}</h3>
+          </div>
+
+          <img src={imageUrl} alt="post" className="post__image" />
+          <h4 className="post__text">
+            <strong>{username}: </strong>
+            {caption}
+          </h4>
+
+          <div className="post__comments">
+            {comments.map((comment) => (
+              <p>
+                <strong>{comment.username}</strong> {comment.text}
+              </p>
+            ))}
+          </div>
+
+          <form className="post__commentBox">
+            <input
+              className="post__input"
+              type="text"
+              placeholder="Add a comment..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            ></input>
+            <button
+              disabled={!comment}
+              className="post__button"
+              type="submit"
+              onClick={postComment}
+            >
+              Post
+            </button>
+          </form>
+        </div>
+      )}{' '}
+    </>
   );
 };
 
